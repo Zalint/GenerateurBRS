@@ -18,6 +18,7 @@
   <div class="card">
     <h1>Choisir un outil</h1>
     <p>Cliquez sur un fichier HTML :</p>
+    <p style="margin-bottom: 12px;"><a href="#" id="logoutLink" style="font-size: 0.9rem; color: #666;">Déconnexion</a></p>
 
     <ul>
       <li><a href="./BRS_Generator_MATA.html">BRS Generator — MATA</a></li>
@@ -25,5 +26,13 @@
       <!-- Ajoutez d’autres liens ici -->
     </ul>
   </div>
+  <script src="auth-guard.js"></script>
+  <script>
+    document.getElementById('logoutLink').onclick = function(e) {
+      e.preventDefault();
+      sessionStorage.removeItem('brs_authenticated');
+      window.location.href = 'login.html';
+    };
+  </script>
 </body>
 </html>
