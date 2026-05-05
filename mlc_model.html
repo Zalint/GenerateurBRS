@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculateur Scooter — MLC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF6EC;
+    --surface: #FFFFFF;
+    --primary: #0F3D2E;
+    --gold: #B8860B;
+    --gold-soft: #D4AF37;
+    --text: #1a2419;
+    --muted: #6b7568;
+    --border: #e8e0cf;
+    --negative: #a02a2a;
+    --chip-bg: #f4ecd8;
+    --chip-derived: #e7e3d2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; line-height: 1.5; min-height: 100vh;
+  }
+  body {
+    background-image:
+      radial-gradient(at 10% 0%, rgba(15,61,46,0.04) 0px, transparent 50%),
+      radial-gradient(at 90% 100%, rgba(184,134,11,0.05) 0px, transparent 50%);
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 24px; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif; font-weight: 500;
+    font-size: clamp(28px, 4vw, 42px); color: var(--primary);
+    letter-spacing: -0.01em; line-height: 1.1;
+  }
+  .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; }
+
+  /* Tabs principaux */
+  .main-tabs {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .main-tabs button {
+    padding: 12px 20px; border: none; background: transparent;
+    font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500;
+    color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .main-tabs button.active { color: var(--primary); border-bottom-color: var(--gold); }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+  @media (min-width: 860px) { .grid { grid-template-columns: 1fr 1fr; gap: 32px; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 24px;
+  }
+  .card-title {
+    font-family: 'Fraunces', serif; font-weight: 500;
+    font-size: 18px; color: var(--primary); margin-bottom: 4px;
+  }
+  .card-sub {
+    font-size: 12px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 20px;
+  }
+  .toggle {
+    display: grid; grid-template-columns: 1fr 1fr;
+    background: var(--chip-bg); border: 1px solid var(--border);
+    border-radius: 4px; padding: 3px; margin-bottom: 18px;
+  }
+  .toggle button {
+    padding: 9px 12px; border: none; background: transparent;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    letter-spacing: 0.04em; color: var(--muted); cursor: pointer;
+    border-radius: 3px; transition: all 0.15s;
+  }
+  .toggle button.active { background: var(--primary); color: #fff; }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-size: 13px; color: var(--text);
+    margin-bottom: 5px; font-weight: 500;
+  }
+  .field .hint { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+  .field input {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 4px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--text); background: #fefcf6;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .field input:focus { outline: none; border-color: var(--primary); background: #fff; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .hidden { display: none !important; }
+
+  .switch-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; background: #fefcf6;
+    border: 1px solid var(--border); border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  .switch-row label { font-size: 13px; font-weight: 500; cursor: pointer; }
+  .switch-row .hint-line { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .switch {
+    position: relative; width: 42px; height: 24px;
+    background: #d6cfba; border-radius: 12px;
+    cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+  }
+  .switch::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 20px; height: 20px; background: #fff; border-radius: 50%;
+    transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .switch.on { background: var(--primary); }
+  .switch.on::after { transform: translateX(18px); }
+
+  .results { background: var(--primary); color: #f0e8d0; border: none; }
+  .results .card-title { color: #fff; }
+  .results .card-sub { color: var(--gold-soft); }
+  .result-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { font-size: 13px; color: rgba(255,255,255,0.75); }
+  .result-value {
+    font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500;
+    color: #fff; font-variant-numeric: tabular-nums;
+  }
+  .result-row.highlight {
+    margin-top: 10px; padding: 16px 0;
+    border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold) !important;
+  }
+  .result-row.highlight .result-label {
+    color: var(--gold-soft); font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+  }
+  .result-row.highlight .result-value { font-size: 24px; color: var(--gold-soft); }
+  .result-value.positive { color: #8de3b8; }
+  .result-value.negative { color: #f5a3a3; }
+  .result-value .pct {
+    font-size: 12px; margin-left: 6px;
+    opacity: 0.75; font-weight: 400;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .result-value.has-annual {
+    display: inline-flex; flex-direction: column;
+    align-items: flex-end; text-align: right;
+  }
+  .result-value .annual {
+    font-size: 11px; margin-top: 2px;
+    opacity: 0.55; font-weight: 400;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .footnote {
+    font-size: 11px; color: rgba(255,255,255,0.5);
+    margin-top: 18px; line-height: 1.6;
+  }
+  .stamp {
+    font-family: 'Fraunces', serif; font-style: italic;
+    color: var(--gold); font-size: 13px; margin-top: 24px; text-align: right;
+  }
+  .scenario-title {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold-soft); font-weight: 600;
+    margin-bottom: 4px; margin-top: 6px;
+  }
+  .scenario-section + .scenario-section { margin-top: 18px; }
+  .sens-row { flex-wrap: wrap; }
+  .sens-expl {
+    flex-basis: 100%;
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 6px;
+    line-height: 1.55;
+  }
+
+  /* Formula editor */
+  .formula-intro {
+    background: #fefcf6; border: 1px solid var(--border);
+    padding: 14px 18px; border-radius: 6px; margin-bottom: 20px;
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+  }
+  .formula-intro strong { color: var(--text); font-weight: 600; }
+  .palette {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 18px 20px; border-radius: 6px; margin-bottom: 20px;
+  }
+  .palette-title {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; margin-bottom: 10px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chips:last-child { margin-bottom: 0; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 10px; background: var(--chip-bg);
+    border: 1px solid var(--border); border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--primary); cursor: grab; user-select: none;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .chip:hover { background: #ebe0c4; }
+  .chip:active { cursor: grabbing; transform: scale(0.97); }
+  .chip.derived { background: var(--chip-derived); color: var(--muted); }
+  .chip-op {
+    background: #fff; color: var(--gold);
+    font-weight: 600;
+  }
+  .formula-row {
+    display: grid; grid-template-columns: 1fr; gap: 10px;
+    padding: 16px 0; border-bottom: 1px dashed var(--border);
+  }
+  .formula-row:last-child { border-bottom: none; }
+  @media (min-width: 720px) {
+    .formula-row { grid-template-columns: 220px 1fr 140px; align-items: center; }
+  }
+  .formula-name {
+    font-family: 'Fraunces', serif; font-size: 14px;
+    color: var(--primary); font-weight: 500;
+  }
+  .formula-name .var-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted); display: block; margin-top: 2px;
+  }
+  .formula-input-wrap { position: relative; }
+  .formula-input {
+    width: 100%; padding: 9px 12px;
+    border: 1px solid var(--border); border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--text); background: #fefcf6;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .formula-input:focus {
+    outline: none; border-color: var(--primary); background: #fff;
+  }
+  .formula-input.drag-over {
+    border-color: var(--gold); background: #fff8e1;
+  }
+  .formula-input.error {
+    border-color: var(--negative); background: #fdf0f0;
+  }
+  .formula-result {
+    font-family: 'Fraunces', serif; font-size: 14px;
+    color: var(--primary); text-align: right; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .formula-actions {
+    display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 18px; border: 1px solid var(--border);
+    background: var(--surface); border-radius: 4px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--text); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--chip-bg); }
+  .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn-primary:hover { background: #1a5a44; }
+  .formula-reset {
+    padding: 4px 8px; font-size: 11px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); border-radius: 3px; cursor: pointer;
+    margin-left: 6px;
+  }
+  .formula-reset:hover { color: var(--negative); border-color: var(--negative); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MATA · MLC</div>
+    <h1>Calculateur de rentabilité scooter</h1>
+    <p class="subtitle">Achat ou leasing : amortissement, charges, marge nette et seuil de rentabilité.</p>
+  </header>
+
+  <div class="main-tabs">
+    <button id="tabSynthese" class="active" type="button">Synthèse</button>
+    <button id="tabFormules" type="button">Formules</button>
+  </div>
+
+  <!-- VUE SYNTHÈSE -->
+  <div id="vueSynthese">
+    <div class="grid">
+      <div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-title">Mode d'acquisition</div>
+          <div class="card-sub">Achat ou leasing</div>
+
+          <div class="toggle">
+            <button id="modeAchat" class="active" type="button">Achat</button>
+            <button id="modeLeasing" type="button">Leasing</button>
+          </div>
+
+          <div class="field">
+            <label>TVA <span class="hint">(%)</span></label>
+            <input type="number" id="tva" value="18" min="0" step="0.5">
+          </div>
+
+          <div id="blocAchat">
+            <div class="field">
+              <label>Prix du scooter HT <span class="hint">(FCFA)</span></label>
+              <input type="number" id="prixHT" value="800000" min="0" step="1000">
+            </div>
+            <div class="field">
+              <label>Durée d'amortissement <span class="hint">(années)</span></label>
+              <input type="number" id="duree" value="1" min="1" step="1">
+            </div>
+          </div>
+
+          <div id="blocLeasing" class="hidden">
+            <div class="field">
+              <label>Mensualité de leasing HT <span class="hint">(FCFA / mois)</span></label>
+              <input type="number" id="leasing" value="100000" min="0" step="500">
+            </div>
+            <div class="field">
+              <label>Durée du contrat <span class="hint">(mois)</span></label>
+              <input type="number" id="dureeLeasing" value="12" min="1" step="1">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Exploitation mensuelle</div>
+          <div class="card-sub">Revenus et charges récurrentes</div>
+
+          <div class="switch-row">
+            <div>
+              <label for="dimancheSwitch">Travailler le dimanche</label>
+              <div class="hint-line" id="dimancheHint">Exclu — 26 jours / mois</div>
+            </div>
+            <div class="switch" id="dimancheSwitch" role="switch" aria-checked="false"></div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Revenu / jour <span class="hint">(FCFA)</span></label>
+              <input type="number" id="revenuJour" value="8300" min="0" step="100">
+            </div>
+            <div class="field">
+              <label>Jours travaillés / mois</label>
+              <input type="number" id="joursMois" value="26" min="1" max="31" step="1">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Salaire livreur / mois <span class="hint">(FCFA)</span></label>
+            <input type="number" id="salaire" value="100000" min="0" step="1000">
+          </div>
+          <div class="field">
+            <label>Coût recharge électrique / jour <span class="hint">(FCFA)</span></label>
+            <input type="number" id="rechargeJour" value="600" min="0" step="50">
+          </div>
+          <div class="field">
+            <label>Charge police d'assurance / mois <span class="hint">(FCFA)</span></label>
+            <input type="number" id="police" value="0" min="0" step="500">
+          </div>
+          <div class="field">
+            <label>Autres charges / mois <span class="hint">(entretien, divers)</span></label>
+            <input type="number" id="autres" value="0" min="0" step="500">
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card results">
+          <div class="card-title">Synthèse</div>
+          <div class="card-sub">Calcul en temps réel</div>
+
+          <div id="achatBlock">
+            <div class="result-row">
+              <span class="result-label">Montant TVA</span>
+              <span class="result-value" id="r-tva">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Prix TTC</span>
+              <span class="result-value" id="r-ttc">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Amortissement / mois</span>
+              <span class="result-value" id="r-amort">—</span>
+            </div>
+          </div>
+
+          <div id="leasingBlock" class="hidden">
+            <div class="result-row">
+              <span class="result-label">Mensualité HT</span>
+              <span class="result-value" id="r-leasingHT">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">TVA mensuelle</span>
+              <span class="result-value" id="r-leasingTVA">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Mensualité TTC</span>
+              <span class="result-value" id="r-leasingTTC">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Coût total contrat TTC</span>
+              <span class="result-value" id="r-leasingTotal">—</span>
+            </div>
+          </div>
+
+          <div class="result-row" style="margin-top:14px;">
+            <span class="result-label">Salaire livreur / mois</span>
+            <span class="result-value" id="r-salaire">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Recharge électrique / mois</span>
+            <span class="result-value" id="r-rechargeMois">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Police d'assurance / mois</span>
+            <span class="result-value" id="r-police">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Autres charges / mois</span>
+            <span class="result-value" id="r-autres">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Total charges / mois</span>
+            <span class="result-value" id="r-charges">—</span>
+          </div>
+
+          <div class="result-row" style="margin-top:14px;">
+            <span class="result-label">Revenu / mois</span>
+            <span class="result-value" id="r-revenu">—</span>
+          </div>
+
+          <div class="result-row highlight">
+            <span class="result-label">Marge nette / mois</span>
+            <span class="result-value" id="r-marge">—</span>
+          </div>
+
+          <div class="result-row">
+            <span class="result-label">Marge nette (%)</span>
+            <span class="result-value" id="r-margePct">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Marge nette / an</span>
+            <span class="result-value" id="r-margeAn">—</span>
+          </div>
+
+          <div class="result-row" style="margin-top:14px;">
+            <span class="result-label">Jours mini / mois pour breakeven</span>
+            <span class="result-value" id="r-joursMinBE">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Marge de sécurité (jours)</span>
+            <span class="result-value" id="r-margeSecu">—</span>
+          </div>
+
+          <div id="achatBlockBis">
+            <div class="result-row">
+              <span class="result-label">ROI annuel</span>
+              <span class="result-value" id="r-roi">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Seuil de rentabilité</span>
+              <span class="result-value" id="r-breakeven">—</span>
+            </div>
+          </div>
+
+          <p class="footnote">
+            <strong style="color:var(--gold-soft);">Jours minimum / breakeven.</strong> Tes charges se divisent en deux. Les <em>charges fixes</em> (amortissement ou leasing, salaire, police, autres) ne dépendent pas du nombre de jours travaillés — tu les paies même si le scooter ne sort pas. Les <em>charges variables</em> (recharge électrique) ne tombent que les jours où tu roules. Chaque jour facturé apporte donc (revenu/jour − recharge/jour) à la marge. Tant que ce cumul ne couvre pas les charges fixes, tu perds de l'argent. Le <em>jour minimum</em> est le seuil à partir duquel tu commences à gagner. La <em>marge de sécurité</em> est la différence avec ton planning actuel : plus elle est grande, plus tu encaisses des imprévus (panne, livreur malade, baisse de demande).
+          </p>
+          <p class="footnote" style="margin-top:8px;">
+            La recharge mensuelle = coût/jour × jours travaillés. Le bouton « Travailler le dimanche » bascule entre 26 jours (exclu) et 30 jours (inclus). En leasing, le ROI et le seuil de rentabilité ne s'affichent pas, faute de capital immobilisé.
+          </p>
+        </div>
+        <div class="card results" style="margin-top:20px;">
+          <div class="card-title">Scénarios &amp; sensibilités</div>
+          <div class="card-sub">Tests de variation sur la marge nette</div>
+
+          <div class="scenario-section">
+            <div class="scenario-title">Marge nette / mois selon hypothèse</div>
+            <div class="result-row">
+              <span class="result-label">Si coût recharge = 0</span>
+              <span class="result-value" id="s-noElec">—</span>
+            </div>
+            <div class="result-row sc-amort">
+              <span class="result-label">Si amortissement = 1 an</span>
+              <span class="result-value" id="s-amort1">—</span>
+            </div>
+            <div class="result-row sc-amort">
+              <span class="result-label">Si amortissement = 2 ans</span>
+              <span class="result-value" id="s-amort2">—</span>
+            </div>
+            <div class="result-row sc-amort">
+              <span class="result-label">Si amortissement = 3 ans</span>
+              <span class="result-value" id="s-amort3">—</span>
+            </div>
+          </div>
+
+          <div class="scenario-section">
+            <div class="scenario-title">Sensibilités (Δ marge)</div>
+            <div class="result-row sens-row">
+              <span class="result-label">+ 10 000 F sur salaire</span>
+              <span class="result-value" id="s-salaire">—</span>
+              <div class="sens-expl" id="expl-salaire">—</div>
+            </div>
+            <div class="result-row sens-row">
+              <span class="result-label">+ 100 F / jour sur recharge</span>
+              <span class="result-value" id="s-recharge">—</span>
+              <div class="sens-expl" id="expl-recharge">—</div>
+            </div>
+            <div class="result-row sens-row sc-amort">
+              <span class="result-label">+ 1 mois sur amortissement</span>
+              <span class="result-value" id="s-amortBump">—</span>
+              <div class="sens-expl" id="expl-amortBump">—</div>
+            </div>
+          </div>
+
+          <p class="footnote">
+            Les scénarios reprennent toutes les autres hypothèses inchangées et appliquent tes formules personnalisées. Une sensibilité positive signifie que la marge augmente après la variation.
+          </p>
+        </div>
+        <div class="stamp">— MLC, logistique électrique</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VUE FORMULES -->
+  <div id="vueFormules" class="hidden">
+    <div class="formula-intro">
+      <strong>Édite les formules à ta guise.</strong> Glisse-dépose les variables ci-dessous dans une formule, ou écris directement. Les opérateurs JavaScript fonctionnent (<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>(</code>, <code>)</code>, <code>**</code>). Les changements s'appliquent en temps réel à l'onglet Synthèse. Sur mobile, tape une variable puis tape dans le champ de formule pour l'insérer.
+    </div>
+
+    <div class="palette">
+      <div class="palette-title">Variables de saisie</div>
+      <div class="chips" id="chipsBase"></div>
+
+      <div class="palette-title" style="margin-top:14px;">Variables dérivées (calculées en cascade)</div>
+      <div class="chips" id="chipsDerived"></div>
+
+      <div class="palette-title" style="margin-top:14px;">Opérateurs</div>
+      <div class="chips" id="chipsOps"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Formules de calcul</div>
+      <div class="card-sub">Modifiables — réinitialisables individuellement</div>
+      <div id="formulasContainer"></div>
+
+      <div class="formula-actions">
+        <button class="btn btn-primary" id="resetAllFormulas" type="button">Réinitialiser toutes les formules</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // CONFIG : variables disponibles
+  // ============================================================
+  const baseVars = ['prixHT','tva','duree','leasingHT','dureeLeasing','joursMois','revenuJour','salaire','rechargeJour','police','autres'];
+  const derivedVars = ['prixTTC','amort','leasingTTC','revenuMois','rechargeMois','charges','chargesFixes','marge','margeAn','margePct','roi','breakeven','joursMinBE','margeSecurite'];
+  const operators = ['+','-','*','/','(',')','**'];
+
+  // ============================================================
+  // CONFIG : formules par défaut (ordre = ordre d'évaluation)
+  // ============================================================
+  const defaultFormulas = [
+    { key:'prixTTC',     label:'Prix TTC',                 expr:'prixHT * (1 + tva/100)' },
+    { key:'amort',       label:'Amortissement / mois',     expr:'prixTTC / (duree * 12)' },
+    { key:'leasingTTC',  label:'Mensualité leasing TTC',   expr:'leasingHT * (1 + tva/100)' },
+    { key:'revenuMois',  label:'Revenu mensuel',           expr:'revenuJour * joursMois' },
+    { key:'rechargeMois',label:'Recharge mensuelle',       expr:'rechargeJour * joursMois' },
+    { key:'charges',     label:'Charges totales (mode-dep)', expr:'(MODE === "achat" ? amort : leasingTTC) + salaire + rechargeMois + police + autres' },
+    { key:'chargesFixes',label:'Charges fixes / mois',     expr:'(MODE === "achat" ? amort : leasingTTC) + salaire + police + autres' },
+    { key:'marge',       label:'Marge mensuelle',          expr:'revenuMois - charges' },
+    { key:'margeAn',     label:'Marge annuelle',           expr:'marge * 12' },
+    { key:'margePct',    label:'Marge en %',               expr:'revenuMois > 0 ? (marge / revenuMois) * 100 : 0' },
+    { key:'roi',         label:'ROI annuel (%)',           expr:'prixTTC > 0 ? (margeAn / prixTTC) * 100 : 0' },
+    { key:'breakeven',   label:'Seuil de rentabilité (mois)', expr:'marge > 0 ? prixTTC / marge : NaN' },
+    { key:'joursMinBE',  label:'Jours mini / mois pour breakeven', expr:'(revenuJour - rechargeJour) > 0 ? chargesFixes / (revenuJour - rechargeJour) : NaN' },
+    { key:'margeSecurite', label:'Marge de sécurité (jours)', expr:'joursMois - joursMinBE' }
+  ];
+
+  let formulas = JSON.parse(JSON.stringify(defaultFormulas));
+  let mode = 'achat';
+  let dimancheInclus = false;
+  let lastFocusedFormulaInput = null;
+
+  const fmt = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
+  const fmt2 = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
+
+  // ============================================================
+  // ONGLETS PRINCIPAUX
+  // ============================================================
+  const tabSynthese = document.getElementById('tabSynthese');
+  const tabFormules = document.getElementById('tabFormules');
+  const vueSynthese = document.getElementById('vueSynthese');
+  const vueFormules = document.getElementById('vueFormules');
+
+  tabSynthese.addEventListener('click', () => {
+    tabSynthese.classList.add('active'); tabFormules.classList.remove('active');
+    vueSynthese.classList.remove('hidden'); vueFormules.classList.add('hidden');
+  });
+  tabFormules.addEventListener('click', () => {
+    tabFormules.classList.add('active'); tabSynthese.classList.remove('active');
+    vueFormules.classList.remove('hidden'); vueSynthese.classList.add('hidden');
+    renderFormulas();
+  });
+
+  // ============================================================
+  // SYNTHÈSE — toggles
+  // ============================================================
+  const btnAchat = document.getElementById('modeAchat');
+  const btnLeasing = document.getElementById('modeLeasing');
+  const blocAchat = document.getElementById('blocAchat');
+  const blocLeasing = document.getElementById('blocLeasing');
+  const achatBlock = document.getElementById('achatBlock');
+  const achatBlockBis = document.getElementById('achatBlockBis');
+  const leasingBlock = document.getElementById('leasingBlock');
+  const dimancheSwitch = document.getElementById('dimancheSwitch');
+  const dimancheHint = document.getElementById('dimancheHint');
+  const joursInput = document.getElementById('joursMois');
+
+  function setMode(m) {
+    mode = m;
+    if (m === 'achat') {
+      btnAchat.classList.add('active'); btnLeasing.classList.remove('active');
+      blocAchat.classList.remove('hidden'); blocLeasing.classList.add('hidden');
+      achatBlock.classList.remove('hidden'); achatBlockBis.classList.remove('hidden');
+      leasingBlock.classList.add('hidden');
+    } else {
+      btnLeasing.classList.add('active'); btnAchat.classList.remove('active');
+      blocLeasing.classList.remove('hidden'); blocAchat.classList.add('hidden');
+      leasingBlock.classList.remove('hidden');
+      achatBlock.classList.add('hidden'); achatBlockBis.classList.add('hidden');
+    }
+    compute();
+  }
+  btnAchat.addEventListener('click', () => setMode('achat'));
+  btnLeasing.addEventListener('click', () => setMode('leasing'));
+
+  function setDimanche(inclus) {
+    dimancheInclus = inclus;
+    dimancheSwitch.classList.toggle('on', inclus);
+    dimancheSwitch.setAttribute('aria-checked', inclus);
+    dimancheHint.textContent = inclus ? 'Inclus — 30 jours / mois' : 'Exclu — 26 jours / mois';
+    joursInput.value = inclus ? 30 : 26;
+    compute();
+  }
+  dimancheSwitch.addEventListener('click', () => setDimanche(!dimancheInclus));
+
+  function num(id) {
+    const v = parseFloat(document.getElementById(id).value);
+    return isFinite(v) ? v : 0;
+  }
+
+  // ============================================================
+  // ÉVALUATION DES FORMULES
+  // ============================================================
+  function evalFormula(expr, vars, modeStr) {
+    const names = Object.keys(vars);
+    const values = Object.values(vars);
+    try {
+      // MODE est passé comme constante littérale dans l'expr
+      const fn = new Function(...names, 'MODE', 'return (' + expr + ')');
+      const result = fn(...values, modeStr);
+      return (typeof result === 'number') ? result : NaN;
+    } catch (e) {
+      return NaN;
+    }
+  }
+
+  function compute() {
+    // Variables de base lues depuis le DOM
+    const baseInputs = {
+      prixHT: num('prixHT'),
+      tva: num('tva'),
+      duree: Math.max(num('duree'), 0.0001),
+      leasingHT: num('leasing'),
+      dureeLeasing: num('dureeLeasing'),
+      joursMois: num('joursMois'),
+      revenuJour: num('revenuJour'),
+      salaire: num('salaire'),
+      rechargeJour: num('rechargeJour'),
+      police: num('police'),
+      autres: num('autres')
+    };
+
+    // Évalue toutes les formules avec les inputs (+ overrides éventuels)
+    function runFormulas(overrides) {
+      const vars = Object.assign({}, baseInputs, overrides || {});
+      const errs = {};
+      derivedVars.forEach(k => vars[k] = 0);
+      formulas.forEach(f => {
+        const r = evalFormula(f.expr, vars, mode);
+        vars[f.key] = isFinite(r) ? r : NaN;
+        errs[f.key] = !isFinite(r);
+      });
+      vars.__errors = errs;
+      return vars;
+    }
+
+    // Scénario principal
+    const vars = runFormulas();
+    const errors = vars.__errors;
+
+    // Affichage synthèse principale
+    document.getElementById('r-salaire').textContent = fmt.format(vars.salaire || 0) + ' F';
+    document.getElementById('r-rechargeMois').textContent = fmt.format(vars.rechargeMois || 0) + ' F';
+    document.getElementById('r-police').textContent = fmt.format(vars.police || 0) + ' F';
+    document.getElementById('r-autres').textContent = fmt.format(vars.autres || 0) + ' F';
+    document.getElementById('r-revenu').textContent = fmt.format(vars.revenuMois || 0) + ' F';
+    document.getElementById('r-charges').textContent = fmt.format(vars.charges || 0) + ' F';
+
+    if (mode === 'achat') {
+      const montantTVA = vars.prixHT * (vars.tva / 100);
+      document.getElementById('r-tva').textContent = fmt.format(montantTVA) + ' F';
+      document.getElementById('r-ttc').textContent = fmt.format(vars.prixTTC || 0) + ' F';
+      document.getElementById('r-amort').textContent = fmt.format(vars.amort || 0) + ' F';
+
+      const roiEl = document.getElementById('r-roi');
+      const roi = vars.roi || 0;
+      roiEl.textContent = isFinite(roi) ? fmt2.format(roi) + ' %' : '—';
+      roiEl.classList.toggle('negative', roi < 0);
+      roiEl.classList.toggle('positive', roi > 0);
+
+      const beEl = document.getElementById('r-breakeven');
+      if (isFinite(vars.breakeven) && vars.breakeven > 0) {
+        beEl.textContent = fmt2.format(vars.breakeven) + ' mois';
+        beEl.classList.remove('negative');
+      } else {
+        beEl.textContent = 'Non atteint';
+        beEl.classList.add('negative');
+      }
+    } else {
+      const leasingTVA = vars.leasingHT * (vars.tva / 100);
+      document.getElementById('r-leasingHT').textContent = fmt.format(vars.leasingHT) + ' F';
+      document.getElementById('r-leasingTVA').textContent = fmt.format(leasingTVA) + ' F';
+      document.getElementById('r-leasingTTC').textContent = fmt.format(vars.leasingTTC || 0) + ' F';
+      document.getElementById('r-leasingTotal').textContent = fmt.format((vars.leasingTTC || 0) * vars.dureeLeasing) + ' F';
+    }
+
+    const margeEl = document.getElementById('r-marge');
+    margeEl.textContent = fmt.format(vars.marge || 0) + ' F';
+    margeEl.classList.toggle('negative', vars.marge < 0);
+
+    const margeAnEl = document.getElementById('r-margeAn');
+    margeAnEl.textContent = fmt.format(vars.margeAn || 0) + ' F';
+    margeAnEl.classList.toggle('negative', vars.margeAn < 0);
+    margeAnEl.classList.toggle('positive', vars.margeAn > 0);
+
+    const margePctEl = document.getElementById('r-margePct');
+    margePctEl.textContent = fmt2.format(vars.margePct || 0) + ' %';
+    margePctEl.classList.toggle('negative', vars.margePct < 0);
+    margePctEl.classList.toggle('positive', vars.margePct > 0);
+
+    // Jours mini breakeven et marge de sécurité
+    const joursMinEl = document.getElementById('r-joursMinBE');
+    if (isFinite(vars.joursMinBE) && vars.joursMinBE > 0) {
+      joursMinEl.textContent = fmt2.format(vars.joursMinBE) + ' jours';
+      joursMinEl.classList.remove('negative');
+    } else {
+      joursMinEl.textContent = 'Non atteint';
+      joursMinEl.classList.add('negative');
+    }
+    const margeSecuEl = document.getElementById('r-margeSecu');
+    if (isFinite(vars.margeSecurite)) {
+      const sign = vars.margeSecurite > 0 ? '+' : (vars.margeSecurite < 0 ? '−' : '');
+      margeSecuEl.textContent = sign + fmt2.format(Math.abs(vars.margeSecurite)) + ' jours';
+      margeSecuEl.classList.toggle('negative', vars.margeSecurite < 0);
+      margeSecuEl.classList.toggle('positive', vars.margeSecurite > 0);
+    } else {
+      margeSecuEl.textContent = '—';
+    }
+
+    // ===== SCÉNARIOS =====
+    // Marge si recharge = 0
+    const sNoElec = runFormulas({ rechargeJour: 0 });
+    setScenarioMarge('s-noElec', sNoElec);
+
+    // Marge selon amortissement 1 / 2 / 3 ans (pertinent en mode achat)
+    const showAmortScenarios = mode === 'achat';
+    document.querySelectorAll('.sc-amort').forEach(el => el.classList.toggle('hidden', !showAmortScenarios));
+
+    if (showAmortScenarios) {
+      setScenarioMarge('s-amort1', runFormulas({ duree: 1 }));
+      setScenarioMarge('s-amort2', runFormulas({ duree: 2 }));
+      setScenarioMarge('s-amort3', runFormulas({ duree: 3 }));
+    }
+
+    // ===== SENSIBILITÉS (Δ marge) =====
+    const baseMarge = vars.marge;
+    const baseRev = vars.revenuMois;
+    const basePct = baseRev > 0 ? (baseMarge / baseRev) * 100 : 0;
+
+    // Salaire +10 000 F
+    const sSalaireBump = runFormulas({ salaire: baseInputs.salaire + 10000 });
+    setSensitivityMarge('s-salaire', sSalaireBump, baseMarge);
+    {
+      const newPct = baseRev > 0 ? (sSalaireBump.marge / baseRev) * 100 : 0;
+      document.getElementById('expl-salaire').textContent =
+        'Le salaire est une charge fixe : chaque franc en plus est transmis 1:1 en perte de marge. ' +
+        'La marge passe de ' + fmt.format(baseMarge) + ' F (' + fmt2.format(basePct) + ' %) ' +
+        'à ' + fmt.format(sSalaireBump.marge) + ' F (' + fmt2.format(newPct) + ' %).';
+    }
+
+    // Recharge +100 F/jour
+    const sRechargeBump = runFormulas({ rechargeJour: baseInputs.rechargeJour + 100 });
+    setSensitivityMarge('s-recharge', sRechargeBump, baseMarge);
+    {
+      const newPct = baseRev > 0 ? (sRechargeBump.marge / baseRev) * 100 : 0;
+      const j = baseInputs.joursMois;
+      document.getElementById('expl-recharge').textContent =
+        'La recharge est une charge variable : 100 F × ' + fmt.format(j) + ' jours = ' +
+        fmt.format(100 * j) + ' F de coût mensuel en plus. ' +
+        'La marge passe de ' + fmt.format(baseMarge) + ' F (' + fmt2.format(basePct) + ' %) ' +
+        'à ' + fmt.format(sRechargeBump.marge) + ' F (' + fmt2.format(newPct) + ' %).';
+    }
+
+    // Amortissement +1 mois
+    if (showAmortScenarios) {
+      const dureeBumped = baseInputs.duree + (1/12); // +1 mois en années
+      const sAmortBump = runFormulas({ duree: dureeBumped });
+      setSensitivityMarge('s-amortBump', sAmortBump, baseMarge);
+      const newPct = baseRev > 0 ? (sAmortBump.marge / baseRev) * 100 : 0;
+      const moisInit = Math.round(baseInputs.duree * 12);
+      document.getElementById('expl-amortBump').textContent =
+        "Allonger l'amortissement de " + moisInit + ' à ' + (moisInit + 1) + ' mois étale le prix TTC ' +
+        'sur une période plus longue, ce qui réduit la mensualité. ' +
+        'La marge passe de ' + fmt.format(baseMarge) + ' F (' + fmt2.format(basePct) + ' %) ' +
+        'à ' + fmt.format(sAmortBump.marge) + ' F (' + fmt2.format(newPct) + ' %).';
+    }
+
+    // Si on est sur l'onglet formules : MAJ des résultats inline
+    if (!vueFormules.classList.contains('hidden')) {
+      formulas.forEach(f => {
+        const previewEl = document.getElementById('preview-' + f.key);
+        const inputEl = document.getElementById('formula-' + f.key);
+        if (previewEl) {
+          const v = vars[f.key];
+          previewEl.textContent = isFinite(v) ? fmt2.format(v) : '⚠ erreur';
+          if (inputEl) inputEl.classList.toggle('error', errors[f.key]);
+        }
+      });
+    }
+  }
+
+  function setVal(id, v, isPct) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!isFinite(v)) { el.textContent = '—'; return; }
+    el.textContent = (isPct ? fmt2.format(v) + ' %' : fmt.format(v) + ' F');
+    el.classList.toggle('negative', v < 0);
+    el.classList.toggle('positive', v > 0);
+  }
+
+  function setScenarioMarge(id, scenarioVars) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const m = scenarioVars.marge;
+    const r = scenarioVars.revenuMois;
+    if (!isFinite(m)) { el.textContent = '—'; el.classList.remove('has-annual'); return; }
+    const pct = r > 0 ? (m / r) * 100 : 0;
+    const annual = m * 12;
+    // ROI annuel = marge annuelle / prix TTC, pertinent seulement en mode achat
+    let annualSuffix = fmt.format(annual) + ' F / an';
+    if (mode === 'achat' && isFinite(scenarioVars.prixTTC) && scenarioVars.prixTTC > 0) {
+      const roi = (annual / scenarioVars.prixTTC) * 100;
+      annualSuffix += ' · ' + fmt2.format(roi) + ' % ROI';
+    }
+    el.innerHTML =
+      '<span>' + fmt.format(m) + ' F<span class="pct">' + fmt2.format(pct) + ' %</span></span>' +
+      '<span class="annual">' + annualSuffix + '</span>';
+    el.classList.add('has-annual');
+    el.classList.toggle('negative', m < 0);
+    el.classList.toggle('positive', m > 0);
+  }
+
+  function setDelta(id, delta) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!isFinite(delta)) { el.textContent = '—'; return; }
+    const sign = delta > 0 ? '+' : (delta < 0 ? '−' : '');
+    el.textContent = sign + fmt.format(Math.abs(delta)) + ' F';
+    el.classList.toggle('positive', delta > 0);
+    el.classList.toggle('negative', delta < 0);
+  }
+
+  function setSensitivityMarge(id, scenarioVars, baseMarge) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const newMarge = scenarioVars.marge;
+    if (!isFinite(newMarge) || !isFinite(baseMarge)) { el.textContent = '—'; return; }
+    const delta = newMarge - baseMarge;
+    const r = scenarioVars.revenuMois;
+    const newPct = r > 0 ? (newMarge / r) * 100 : 0;
+    const sign = delta > 0 ? '+' : (delta < 0 ? '−' : '');
+    el.innerHTML =
+      sign + fmt.format(Math.abs(delta)) + ' F' +
+      '<span class="pct">→ ' + fmt2.format(newPct) + ' %</span>';
+    el.classList.toggle('positive', delta > 0);
+    el.classList.toggle('negative', delta < 0);
+  }
+
+  // Listeners inputs
+  baseVars.forEach(name => {
+    const idMap = { leasingHT: 'leasing' };
+    const id = idMap[name] || name;
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', compute);
+  });
+
+  // ============================================================
+  // ONGLET FORMULES — palette + drag & drop
+  // ============================================================
+  const chipsBase = document.getElementById('chipsBase');
+  const chipsDerived = document.getElementById('chipsDerived');
+  const chipsOps = document.getElementById('chipsOps');
+
+  function makeChip(text, type) {
+    const span = document.createElement('span');
+    span.className = 'chip' + (type === 'derived' ? ' derived' : type === 'op' ? ' chip-op' : '');
+    span.textContent = text;
+    span.draggable = true;
+    span.dataset.token = text;
+    span.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', text);
+      e.dataTransfer.effectAllowed = 'copy';
+    });
+    // Tap-to-insert pour mobile / clic
+    span.addEventListener('click', () => {
+      if (lastFocusedFormulaInput) {
+        insertAtCursor(lastFocusedFormulaInput, text);
+        lastFocusedFormulaInput.focus();
+        lastFocusedFormulaInput.dispatchEvent(new Event('input'));
+      }
+    });
+    return span;
+  }
+
+  baseVars.forEach(v => chipsBase.appendChild(makeChip(v, 'base')));
+  derivedVars.forEach(v => chipsDerived.appendChild(makeChip(v, 'derived')));
+  operators.forEach(o => chipsOps.appendChild(makeChip(o, 'op')));
+
+  function insertAtCursor(input, text) {
+    const start = input.selectionStart || 0;
+    const end = input.selectionEnd || 0;
+    const before = input.value.substring(0, start);
+    const after = input.value.substring(end);
+    const sep = (before && !before.endsWith(' ') && !before.endsWith('(')) ? ' ' : '';
+    const sepAfter = (after && !after.startsWith(' ') && !after.startsWith(')')) ? ' ' : '';
+    input.value = before + sep + text + sepAfter + after;
+    const newPos = (before + sep + text + sepAfter).length;
+    input.selectionStart = input.selectionEnd = newPos;
+  }
+
+  function renderFormulas() {
+    const container = document.getElementById('formulasContainer');
+    container.innerHTML = '';
+    formulas.forEach((f, idx) => {
+      const row = document.createElement('div');
+      row.className = 'formula-row';
+
+      const name = document.createElement('div');
+      name.className = 'formula-name';
+      name.innerHTML = f.label + '<span class="var-name">' + f.key + '</span>';
+
+      const inputWrap = document.createElement('div');
+      inputWrap.className = 'formula-input-wrap';
+      const input = document.createElement('input');
+      input.className = 'formula-input';
+      input.type = 'text';
+      input.value = f.expr;
+      input.id = 'formula-' + f.key;
+      input.spellcheck = false;
+      input.autocomplete = 'off';
+      input.addEventListener('input', () => {
+        formulas[idx].expr = input.value;
+        compute();
+      });
+      input.addEventListener('focus', () => { lastFocusedFormulaInput = input; });
+      input.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        input.classList.add('drag-over');
+      });
+      input.addEventListener('dragleave', () => input.classList.remove('drag-over'));
+      input.addEventListener('drop', (e) => {
+        e.preventDefault();
+        input.classList.remove('drag-over');
+        const token = e.dataTransfer.getData('text/plain');
+        // Position d'insertion approximée à la fin si pas de selection
+        insertAtCursor(input, token);
+        formulas[idx].expr = input.value;
+        compute();
+        input.focus();
+      });
+
+      // Reset par formule
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'formula-reset';
+      resetBtn.textContent = 'Reset';
+      resetBtn.type = 'button';
+      resetBtn.title = 'Restaurer la formule par défaut';
+      resetBtn.addEventListener('click', () => {
+        formulas[idx].expr = defaultFormulas[idx].expr;
+        input.value = defaultFormulas[idx].expr;
+        compute();
+      });
+
+      inputWrap.appendChild(input);
+      inputWrap.appendChild(resetBtn);
+
+      const preview = document.createElement('div');
+      preview.className = 'formula-result';
+      preview.id = 'preview-' + f.key;
+      preview.textContent = '—';
+
+      row.appendChild(name);
+      row.appendChild(inputWrap);
+      row.appendChild(preview);
+      container.appendChild(row);
+    });
+    compute();
+  }
+
+  document.getElementById('resetAllFormulas').addEventListener('click', () => {
+    formulas = JSON.parse(JSON.stringify(defaultFormulas));
+    renderFormulas();
+  });
+
+  // Init
+  compute();
+</script>
+</body>
+</html>
